@@ -15,7 +15,11 @@ class Homestead
         # Configure The Box
         config.vm.define settings["name"] ||= "homestead-7"
         config.vm.box = settings["box"] ||= "laravel/homestead"
-        config.vm.box_version = settings["version"] ||= ">= 3.0.0"
+		
+		# Only check version if it's not a direct box
+		if (settings["box"] =~ /\//) != nil 
+			config.vm.box_version = settings["version"] ||= ">= 3.0.0"
+		end
         config.vm.hostname = settings["hostname"] ||= "homestead"
 
         # Configure A Private Network IP
@@ -257,16 +261,18 @@ class Homestead
         # Configure All Of The Configured Databases
         if settings.has_key?("databases")
             settings["databases"].each do |db|
+				db_user = db["user"] || db["name"]
+				db_pass = db["password"] || "secret" + db["name"]
                 config.vm.provision "shell" do |s|
-                    s.name = "Creating MySQL Database: " + db
+                    s.name = "Creating MySQL Database: " + db["name"]
                     s.path = scriptDir + "/create-mysql.sh"
-                    s.args = [db]
+                    s.args = [db["name"], db_user, db_pass]
                 end
 
                 config.vm.provision "shell" do |s|
-                    s.name = "Creating Postgres Database: " + db
+                    s.name = "Creating Postgres Database: " + db["name"]
                     s.path = scriptDir + "/create-postgres.sh"
-                    s.args = [db]
+                    s.args = [db["name"], db_user, db_pass]
                 end
 
                 if settings.has_key?("mongodb") && settings["mongodb"]

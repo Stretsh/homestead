@@ -11,8 +11,16 @@ fi
 
 export DEBIAN_FRONTEND=noninteractive
 sudo service nginx stop
-apt-get update
-apt-get install -y apache2 libapache2-mod-php"$5"
+if (( ! $(service --status-all | grep -c "apache2") )); then
+
+	apt-get update
+	apt-get install -y apache2
+	
+else 
+	if (( ! $(dpkg --list | grep -c libapache2-mod-php"$5") )); then
+		apt-get install -y libapache2-mod-php"$5"
+	fi
+fi
 sed -i "s/www-data/vagrant/" /etc/apache2/envvars
 
 block="<VirtualHost *:$3>

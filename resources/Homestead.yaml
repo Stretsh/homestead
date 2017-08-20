@@ -18,7 +18,7 @@ sites:
       to: /home/vagrant/Code/public
 
 databases:
-    - homestead
+    - name: homestead
 
 # blackfire:
 #     - id: foo
